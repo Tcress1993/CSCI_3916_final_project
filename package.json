@@ -1,0 +1,29 @@
+{
+  "name": "csci_3916_final_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Event.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tcress1993/CSCI_3916_final_project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tcress1993/CSCI_3916_final_project/issues"
+  },
+  "homepage": "https://github.com/Tcress1993/CSCI_3916_final_project#readme",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "passport": "^0.7.0"
+  }
+}
