@@ -1,13 +1,21 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-try {
-    mongoose.connect( process.env.DB, {useNewUrlParser: true, useUnifiedTopology: true}, () =>
-    console.log("connected to database"));
-}catch (error) {
-    console.log("could not connect");
+require('dotenv').config();
+//connect to the database
+async function connectDB() {
+    try{
+        await mongoose.connect(process.env.DB, {useNewUrlParser: true, useUnifiedTopology: true});
+        console.log("connected to database: event");
+    }catch(err){
+        console.log("could not connect to database: events");
+    }
+
 }
-mongoose.set('useCreateIndex', true);
+
+connectDB();
+
+
 //  Event schema
 var EventSchema = new Schema({
     title: {type: String, required: true, index: true},
