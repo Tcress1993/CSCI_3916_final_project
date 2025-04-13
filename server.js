@@ -7,6 +7,8 @@ const cors = require('cors');
 const User = require('./Users');
 const Event = require('./Events');
 const Todo = require('./Todos');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
 
 const app = express();
@@ -70,7 +72,107 @@ router.post('/signin', async(req, res) => {
 router.route('/events')
     .post(authJwtController.isAuthenticated, async(req, res) => {
         try{
+           const {title, date, time, repeat, notes, location} = req.body;
+           if (!title || !date || !time){
+               return res.status(400).json({success: false, msg: 'Please include title, date and time.'});
+           }
+            const event = new Event({title, date, time, repeat, notes, location});
+            await event.save();
+            res.status(201).json({success: true, msg: 'Event created successfully.'});
+
+        }catch(error){
+            console.error(error);
+            res.status(500).json({success: false, msg: 'Server error.'});
+        }
+    })
+    .get(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const {date} = req.query;
+            if (!date){
+                return res.status(400).json({success: false, msg: 'Please include date.'});
+            } 
+            const events = await Event.find({date}); // get every event for the given date
+            res.status(200).json({success: true, events});
+        }catch(error){
+            res.status(500).json({success: false, msg: 'Server error.'});
+        }
+    })
+    .put(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const {_id,...update} = req.body;
+            if (!_id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const updateEvent = await Event.findByIdAndUpdate(_id, update);
+            res.status(200).json({success: true, msg: "Event updated"})
             
+        }catch(err){
+            res.status(500).json({success: false, msg: "Put not supported"})
+        }
+    })
+    .delete(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const {_id} = req.body;
+            if (!_id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const deleteEvent = await Event.findByIdAndDelete(_id);
+            res.status(200).json({success: true, msg: "Event deleted"})
+        }catch(err){
+            res.status(500).json({success: false, msg: "Delete not supported"})
         }
     });
 
+router.route('/todos')
+    .post(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const {title} = req.body;
+            if (!title){
+                return res.status(400).json({success: false, msg: 'Please include title.'});
+            }
+            const todo = new Todo({title});
+            await todo.save();
+        }catch(err){
+            res.status(500).json({success: false, msg: "Post not supported"})
+        }
+    })
+    .get(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const todos = await Todo.find({complete: false});
+            res.status(200).json({success: true, todos});
+        }catch(err){
+            res.status(500).json({success: false, msg: "Get not supported"})
+        }
+    })
+    .delete(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const {_id} = req.body;
+            if (_id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const deleteTodo = await Todo.findByIdAndDelete(_id);
+            res.status(200).json({success: true, msg: "Todo deleted"})
+        }catch(err){
+            res.status(500).json({success: false, msg: "Delete not supported"}) 
+        }
+    });
+
+router.route('/todos/:id')
+    .put(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const id = req.params.id;
+            if (_id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const updateTodo = await Todo.findByIdAndUpdate(_id, {complete: true, completedAt: Date.now()});
+            res.status(200).json({success: true, msg: "Todo completed"})
+        }catch(err){
+            res.status(500).json({success: false, msg: "Put not supported"})
+        }
+    });
+
+app.use('/', router);
+app.listen(process.env.PORT || 8080, () => {
+    console.log('Server is running on port 8080');
+});
+module.exports = router;
