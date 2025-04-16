@@ -49,6 +49,7 @@ router.post('/signup', async(req, res) => {
 
 //login for the calander app
 router.post('/signin', async(req, res) => {
+    console.log("signin called");
     try{
         const user = await User.findOne({username: req.body.username}).select('name username password');
         if (!user){
