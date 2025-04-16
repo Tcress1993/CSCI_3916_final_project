@@ -23,6 +23,7 @@ const router = express.Router();
 
 //signup for the calander app
 router.post('/signup', async(req, res) => {
+    console.log("signup called");
     //makes sure that the user put both username and password
     if (!req.body.username || !req.body.password){
         return res.status(400).json({success: false, msg: 'Please include username and password.'});
