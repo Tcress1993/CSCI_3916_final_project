@@ -2,19 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt-nodejs');
 
-require('dotenv').config();
-//connect to the database
-async function connectDB() {
-    try{
-        await mongoose.connect(process.env.DB, {useNewUrlParser: true, useUnifiedTopology: true});
-        console.log("connected to database: user");
-    }catch(err){
-        console.log("could not connect to database: user");
-    }
 
-}
-
-connectDB();
 //user schema
 var UserSchema = new Schema({
     name: String,

@@ -8,9 +8,10 @@ const User = require('./User');
 const Event = require('./Events');
 const Todo = require('./Todos');
 const mongoose = require('mongoose');
+const connectDB = require('./connectDB');
 require('dotenv').config();
 
-
+connectDB();
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
