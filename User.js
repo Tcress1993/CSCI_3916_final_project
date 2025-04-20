@@ -25,12 +25,17 @@ UserSchema.pre('save', function(next) {
     });
 });
 
-UserSchema.methods.comparePassword = function (password, callback) {
+UserSchema.methods.comparePassword = function (password) {
     var user = this;
 
-    bcrypt.compare(password, user.password, function(err, isMatch) {
-        callback(isMatch);
-    })
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(password, user.password, function(err, isMatch) {
+            if (err) return reject(err);
+            resolve(isMatch);
+        });
+    }
+    
+    );
 }
 
 //return the model to server
