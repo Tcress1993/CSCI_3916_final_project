@@ -72,6 +72,18 @@ router.post('/signin', async(req, res) => {
 });
 
 router.route('/events')
+    .get(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const {date} = req.query;
+            if (!date){
+                return res.status(400).json({success: false, msg: 'Please include date.'});
+            } 
+            const events = await Event.find({date}); // get every event for the given date
+            res.status(200).json({success: true, events});
+        }catch(error){
+            res.status(500).json({success: false, msg: 'Server error.'});
+        }
+    })
     .post(authJwtController.isAuthenticated, async(req, res) => {
         try{
            const {title, date, time, repeat, notes, location} = req.body;
@@ -87,18 +99,7 @@ router.route('/events')
             res.status(500).json({success: false, msg: 'Server error.'});
         }
     })
-    .get(authJwtController.isAuthenticated, async(req, res) => {
-        try{
-            const {date} = req.query;
-            if (!date){
-                return res.status(400).json({success: false, msg: 'Please include date.'});
-            } 
-            const events = await Event.find({date}); // get every event for the given date
-            res.status(200).json({success: true, events});
-        }catch(error){
-            res.status(500).json({success: false, msg: 'Server error.'});
-        }
-    })
+    
     .put(authJwtController.isAuthenticated, async(req, res) => {
         try{
             const {_id,...update} = req.body;
