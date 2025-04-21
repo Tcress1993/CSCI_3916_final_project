@@ -75,12 +75,27 @@ router.route('/events')
     .get(authJwtController.isAuthenticated, async(req, res) => {
         //get all the events for a given day
         try{
-            const {date} = req.query;
-            if (!date){
-                return res.status(400).json({success: false, msg: 'Please include date.'});
-            } 
-            const events = await Event.find({date}); // get every event for the given date
-            res.status(200).json({success: true, events});
+            //get the event by date(single event)
+            const {date, month, year} = req.query;
+            if (!date && (!month || !year)){
+                return res.status(400).json({success: false, msg: 'Please include date, month, and year.'});
+            }
+            if (date){
+                //all the events for a given date
+                const events = await Event.find({date: new Date(date)});
+                if (!events){
+                    return res.status(404).json({success: false, msg: 'No events found for this date.'});
+                }
+                res.status(200).json({success: true, events});
+            }
+            else if(month && year){
+                //all the events for a given month and year
+                const events = await Event.find({month: parseInt(month), year: parseInt(year)});
+                if (!events){
+                    return res.status(404).json({success: false, msg: 'No events found for this month and year.'});
+                }
+                res.status(200).json({success: true, events});
+            }
         }catch(error){
             res.status(500).json({success: false, msg: 'Server error.'});
         }
