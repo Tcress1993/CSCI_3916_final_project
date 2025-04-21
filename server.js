@@ -77,9 +77,7 @@ router.route('/events')
         try{
             //get the event by date(single event)
             const {date, month, year} = req.query;
-            if (!date && (!month || !year)){
-                return res.status(400).json({success: false, msg: 'Please include date, month, and year.'});
-            }
+            
             if (date){
                 //all the events for a given date
                 const events = await Event.find({date: new Date(date)});
@@ -95,6 +93,9 @@ router.route('/events')
                     return res.status(404).json({success: false, msg: 'No events found for this month and year.'});
                 }
                 res.status(200).json({success: true, events});
+            }else{
+                //catch if the date or the month and year is not included
+                res.status(400).json({success: false, msg: 'Please include date or month and year.'});
             }
         }catch(error){
             res.status(500).json({success: false, msg: 'Server error.'});
