@@ -73,6 +73,7 @@ router.post('/signin', async(req, res) => {
 
 router.route('/events')
     .get(authJwtController.isAuthenticated, async(req, res) => {
+        //get all the events for a given day
         try{
             const {date} = req.query;
             if (!date){
@@ -85,10 +86,11 @@ router.route('/events')
         }
     })
     .post(authJwtController.isAuthenticated, async(req, res) => {
+        //add a new event to the calander(title, date, time are required others are optional)
         try{
            const {title, date, time, repeat, notes, location} = req.body;
            if (!title || !date || !time){
-               return res.status(400).json({success: false, msg: 'Please include title, date and time.'});
+               return res.status(400).json({success: false, msg: 'Please include title, date, and time.'});
            }
             const event = new Event({title, date, time, repeat, notes, location});
             await event.save();
@@ -101,12 +103,18 @@ router.route('/events')
     })
     
     .put(authJwtController.isAuthenticated, async(req, res) => {
+        //update multiple fields of an event
+        //update the event with the given id and update it with the new values
         try{
-            const {_id,...update} = req.body;
-            if (!_id){
-                res.status(400).json({success: false, msg: 'Please include id.'});
+            const {_id,title,date, time, repeat, notes, location } = req.body;
+            if (!_id|| !title || !date || !time){
+                res.status(400).json({success: false, msg: 'Please include id, title, date, and time.'});
             }
-            const updateEvent = await Event.findByIdAndUpdate(_id, update);
+            const update = {title, date, time, repeat, notes, location};
+            const updateEvent = await Event.findByIdAndUpdate(_id, update, {new: true});
+            if (!updateEvent){
+                return res.status(404).json({success: false, msg: 'Event not found.'});
+            }
             res.status(200).json({success: true, msg: "Event updated"})
             
         }catch(err){
@@ -114,6 +122,7 @@ router.route('/events')
         }
     })
     .delete(authJwtController.isAuthenticated, async(req, res) => {
+        //delete an event with the given id
         try{
             const {_id} = req.body;
             if (!_id){
@@ -124,29 +133,84 @@ router.route('/events')
         }catch(err){
             res.status(500).json({success: false, msg: "Delete not supported"})
         }
-    });
+    })
+    .patch(authJwtController.isAuthenticated, async(req, res) => {
+        //partially update an event with the given id and the new values
+        try{
+            const {_id, ...update} = req.body;
+            if (!_id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const updateEvent = await Event.findByIdAndUpdate(_id, update);
+            if (!updateEvent){
+                return res.status(404).json({success: false, msg: 'Event not found.'});
+            }
+            res.status(200).json({success: true, msg: "Event updated"})
+        }catch(err){
+            res.status(500).json({success: false, msg: "Patch not supported"});
+        }
+    })
+
+router.route('/events/:id')
+    .get(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const id = req.params.id;
+            if(!id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const event = await Event.findById(id);
+            if(!event){
+                return res.status(404).json({success: false, msg: 'Event not found.'});
+            }
+            res.status(200).json({success: true, event});
+        }catch(err){
+            res.status(500).json({success: false, msg: "Get not supported"});
+            console.error(err); // log the error to the console
+        }
+    })
 
 router.route('/todos')
+    .get(authJwtController.isAuthenticated, async(req, res) => {
+        //get all the uncompleted todos
+        try{
+            const todos = await Todo.find({complete: false});
+            res.status(200).json({success: true, todos});
+        }catch(err){
+            res.status(500).json({success: false, msg: "Get not supported"});
+            console.error(err);
+        }
+    })
     .post(authJwtController.isAuthenticated, async(req, res) => {
+        //add a new todo to the list(title is required)
+        //all other fields are for report perposes only
         try{
             const {title} = req.body;
             if (!title){
                 return res.status(400).json({success: false, msg: 'Please include title.'});
             }
-            const todo = new Todo({title});
+            const todo = new Todo({title, createdat: Date.now()});
             await todo.save();
         }catch(err){
-            res.status(500).json({success: false, msg: "Post not supported"})
+            res.status(500).json({success: false, msg: "Post not supported"});
+            console.error(err);
         }
     })
-    .get(authJwtController.isAuthenticated, async(req, res) => {
+    .put(authJwtController.isAuthenticated, async(req, res) => {
+        //update 
         try{
-            const todos = await Todo.find({complete: false});
-            res.status(200).json({success: true, todos});
+            const{_id,title, complete, createdAt, completeAt} = req.body;
+            if(!_id|| !title){
+                res.status(400).json({success: false, msg: 'Please include id and title.'});
+            }
+            const update = {title, complete, createdAt, completeAt};
+            const updateTodo = await Todo.findByIdAndUpdate(_id, update,{new: true});
+            res.status(200).json({success: true, msg: "Todo updated"})
         }catch(err){
-            res.status(500).json({success: false, msg: "Get not supported"})
+            res.status(500).json({success: false, msg: "Put not supported"});
+            console.error(err);
         }
     })
+
     .delete(authJwtController.isAuthenticated, async(req, res) => {
         try{
             const {_id} = req.body;
@@ -156,12 +220,31 @@ router.route('/todos')
             const deleteTodo = await Todo.findByIdAndDelete(_id);
             res.status(200).json({success: true, msg: "Todo deleted"})
         }catch(err){
-            res.status(500).json({success: false, msg: "Delete not supported"}) 
+            res.status(500).json({success: false, msg: "Delete not supported"});
+            console.error(err); 
         }
-    });
+    })
+    .patch(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+            const{_id, ...update} = req.body;
+            if(!_id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const updateTodo = await Todo.findByIdAndUpdate(_id, update);
+            if (!updateTodo){
+                return res.status(404).json({success: false, msg: 'Todo not found.'});
+            }
+            res.status(200).json({success: true, msg: "Todo updated"})
+        }catch(err){
+            res.status(500).json({success: false, msg: "Patch not supported"});
+            console.error(err);
+        }
+    })
 
 router.route('/todos/:id')
     .put(authJwtController.isAuthenticated, async(req, res) => {
+        //complete a todo item with the given id
+        //The completed date is set to the current date and time
         try{
             const id = req.params.id;
             if (_id){
