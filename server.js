@@ -108,7 +108,11 @@ router.route('/events')
            if (!title || !date || !time){
                return res.status(400).json({success: false, msg: 'Please include title, date, and time.'});
            }
-            const event = new Event({title, date, time, repeat, notes, location});
+            const eventDate = new Date(date);
+            const month = eventDate.getMonth() + 1; // Months are zero-based in JavaScript
+            const year = eventDate.getFullYear();
+
+            const event = new Event({title, date, time, month, year, repeat, notes, location});
             await event.save();
             res.status(201).json({success: true, msg: 'Event created successfully.'});
 

@@ -18,17 +18,6 @@ var EventSchema = new Schema({
 
 });
 
-EventSchema.pre('save', function (next){
-    if (this.date){
-        const eventDate = new Date(this.date);
-        console.log(eventDate)
-        this.month = eventDate.getMonth() +1; //get the right number for the month
-        this.year = eventDate.getFullYear();
-        console.log(this.month);
-        console.log(this.year); 
 
-    }
-    next();
-})
 // return the model
 module.exports = mongoose.model('Event', EventSchema);
