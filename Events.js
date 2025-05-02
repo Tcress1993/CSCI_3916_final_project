@@ -12,7 +12,7 @@ var EventSchema = new Schema({
     time: {type: String, required: true},
     month: {type: Number, required: true},
     year: {type: Number, required: true},
-    repeat: {type: String, enum: ['never', 'daily', 'weekly', 'monthly', 'yearly'], default: 'never'},
+    repeat: {type: String, enum: ['Never', 'Daily', 'Weekly', 'Monthly', 'Yearly'], default: 'Never'},
     notes: {type: String},
     location: {type: String},
 
