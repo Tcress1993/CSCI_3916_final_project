@@ -179,16 +179,47 @@ router.route('/events/:id')
     .delete(authJwtController.isAuthenticated, async(req, res) => {
         //delete an event with the given id
         try{
-            const {_id} = req.params.id;
-            if (!_id){
+            const id = req.params.id;
+            if (id){
                 res.status(400).json({success: false, msg: 'Please include id.'});
             }
-            const deleteEvent = await Event.findByIdAndDelete(_id);
+            const deleteEvent = await Event.findByIdAndDelete(id);
             res.status(200).json({success: true, msg: "Event deleted"})
         }catch(err){
             res.status(500).json({success: false, msg: "Delete not supported"})
         }
     })
+    .patch(authJwtController.isAuthenticated, async(req, res) => {
+        try{
+        const {_id} = req.params.id;
+        const {...update}= req.body;
+        if (!_id){
+            res.status(400).json({success: false, msg: 'Please include id.'})
+        }
+        const updatedEvent = await Event.findByIdAndUpdate(_id, update);
+        res.status(200).json({sucess: true, msg: 'Event Updated'})
+        }catch(err){
+            res.status(500).json({sucess: false, msg: 'Patch not supported'});
+        } 
+    })
+    .put(authJwtController.isAuthenticated, async(req, res) => {
+        //update the event with the given id and update it with the new values
+        try{
+            const {_id,title,date, time, repeat, notes, location } = req.body;
+            if (!_id|| !title || !date || !time){
+                res.status(400).json({success: false, msg: 'Please include id, title, date, and time.'});
+            }
+            const update = {title, date, time, repeat, notes, location};
+            const updateEvent = await Event.findByIdAndUpdate(_id, update, {new: true});
+            if (!updateEvent){
+                return res.status(404).json({success: false, msg: 'Event not found.'});
+            }
+            res.status(200).json({success: true, msg: "Event updated"})
+            
+        }catch(err){
+            res.status(500).json({success: false, msg: "Put not supported"})
+        }
+    });
 
 router.route('/todos')
     .get(authJwtController.isAuthenticated, async(req, res) => {
