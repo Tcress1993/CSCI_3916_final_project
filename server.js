@@ -141,19 +141,7 @@ router.route('/events')
             res.status(500).json({success: false, msg: "Put not supported"})
         }
     })
-    .delete(authJwtController.isAuthenticated, async(req, res) => {
-        //delete an event with the given id
-        try{
-            const {_id} = req.body;
-            if (!_id){
-                res.status(400).json({success: false, msg: 'Please include id.'});
-            }
-            const deleteEvent = await Event.findByIdAndDelete(_id);
-            res.status(200).json({success: true, msg: "Event deleted"})
-        }catch(err){
-            res.status(500).json({success: false, msg: "Delete not supported"})
-        }
-    })
+    
     .patch(authJwtController.isAuthenticated, async(req, res) => {
         //partially update an event with the given id and the new values
         try{
@@ -186,6 +174,19 @@ router.route('/events/:id')
         }catch(err){
             res.status(500).json({success: false, msg: "Get not supported"});
             console.error(err); // log the error to the console
+        }
+    })
+    .delete(authJwtController.isAuthenticated, async(req, res) => {
+        //delete an event with the given id
+        try{
+            const {_id} = req.params.id;
+            if (!_id){
+                res.status(400).json({success: false, msg: 'Please include id.'});
+            }
+            const deleteEvent = await Event.findByIdAndDelete(_id);
+            res.status(200).json({success: true, msg: "Event deleted"})
+        }catch(err){
+            res.status(500).json({success: false, msg: "Delete not supported"})
         }
     })
 
