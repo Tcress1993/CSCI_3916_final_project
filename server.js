@@ -180,7 +180,7 @@ router.route('/events/:id')
         //delete an event with the given id
         try{
             const id = req.params.id;
-            if (id){
+            if (!id){
                 res.status(400).json({success: false, msg: 'Please include id.'});
             }
             const deleteEvent = await Event.findByIdAndDelete(id);
